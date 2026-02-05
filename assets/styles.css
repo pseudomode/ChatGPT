@@ -1,0 +1,65 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #000;
+}
+
+.viewer-page {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+#viewer {
+  height: 100%;
+  width: 100%;
+}
+
+.overlay-link {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 2;
+}
+
+.overlay-link:hover,
+.overlay-link:focus-visible {
+  transform: translate(-50%, -50%) scale(1.05);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.overlay-link img {
+  width: 64px;
+  height: 64px;
+}
+
+.overlay-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.page-title {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 2;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  border-radius: 999px;
+}
