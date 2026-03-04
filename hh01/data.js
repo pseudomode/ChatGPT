@@ -47,7 +47,8 @@ var APP_DATA = {
           "yaw": -0.00394551565670298,
           "pitch": 0.030915768966805146,
           "title": "Center Island",
-          "text": "Text"
+          "text": "Text",
+          "url": "https://example.com"
         },
         {
           "yaw": -0.70147357628327,
