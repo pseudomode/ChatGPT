@@ -29,6 +29,7 @@
   var sceneListToggleElement = document.querySelector('#sceneListToggle');
   var autorotateToggleElement = document.querySelector('#autorotateToggle');
   var fullscreenToggleElement = document.querySelector('#fullscreenToggle');
+  var WebEmbedOverlay = createWebEmbedOverlay();
 
   // Detect desktop or mobile mode.
   if (window.matchMedia) {
@@ -244,6 +245,129 @@
     }
   }
 
+  function createWebEmbedOverlay() {
+    var backdrop = document.createElement('div');
+    backdrop.classList.add('web-embed-overlay');
+
+    var modal = document.createElement('div');
+    modal.classList.add('web-embed-modal');
+
+    var header = document.createElement('div');
+    header.classList.add('web-embed-header');
+
+    var title = document.createElement('div');
+    title.classList.add('web-embed-title');
+
+    var closeButton = document.createElement('button');
+    closeButton.classList.add('web-embed-close');
+    closeButton.setAttribute('type', 'button');
+    closeButton.setAttribute('aria-label', 'Close embedded site');
+    closeButton.innerHTML = '&times;';
+
+    var body = document.createElement('div');
+    body.classList.add('web-embed-body');
+
+    var loading = document.createElement('div');
+    loading.classList.add('web-embed-loading');
+    loading.innerHTML = '<span class="web-embed-spinner" aria-hidden="true"></span><span>Loading…</span>';
+
+    var iframe = document.createElement('iframe');
+    iframe.classList.add('web-embed-iframe');
+    // Some sites may block iframe embedding through X-Frame-Options/CSP frame-ancestors.
+    iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+    iframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen');
+    iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+
+    var footer = document.createElement('div');
+    footer.classList.add('web-embed-footer');
+
+    var fallbackText = document.createElement('span');
+    fallbackText.classList.add('web-embed-fallback-text');
+    fallbackText.textContent = 'This site may block embedding. Open in a new tab.';
+
+    var fallbackLink = document.createElement('a');
+    fallbackLink.classList.add('web-embed-fallback-link');
+    fallbackLink.textContent = 'Open in new tab';
+    fallbackLink.setAttribute('target', '_blank');
+    fallbackLink.setAttribute('rel', 'noopener noreferrer');
+
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    body.appendChild(loading);
+    body.appendChild(iframe);
+    footer.appendChild(fallbackText);
+    footer.appendChild(fallbackLink);
+    modal.appendChild(header);
+    modal.appendChild(body);
+    modal.appendChild(footer);
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    var loadWatchdog = null;
+
+    function close() {
+      if (loadWatchdog) {
+        clearTimeout(loadWatchdog);
+        loadWatchdog = null;
+      }
+      backdrop.classList.remove('visible');
+      iframe.removeAttribute('src');
+      document.body.classList.remove('web-embed-open');
+      loading.classList.remove('hidden');
+      footer.classList.remove('visible');
+    }
+
+    function open(opts) {
+      var overlayTitle = opts && opts.title ? opts.title : '';
+      var overlayUrl = opts && opts.url ? opts.url : '';
+
+      if (!overlayUrl) {
+        return;
+      }
+
+      if (loadWatchdog) {
+        clearTimeout(loadWatchdog);
+      }
+
+      title.textContent = overlayTitle;
+      fallbackLink.href = overlayUrl;
+      footer.classList.remove('visible');
+      loading.classList.remove('hidden');
+      iframe.src = overlayUrl;
+      backdrop.classList.add('visible');
+      document.body.classList.add('web-embed-open');
+
+      loadWatchdog = setTimeout(function() {
+        footer.classList.add('visible');
+      }, 3000);
+    }
+
+    iframe.addEventListener('load', function() {
+      loading.classList.add('hidden');
+      if (loadWatchdog) {
+        clearTimeout(loadWatchdog);
+        loadWatchdog = null;
+      }
+    });
+
+    closeButton.addEventListener('click', close);
+    backdrop.addEventListener('click', function(event) {
+      if (event.target === backdrop) {
+        close();
+      }
+    });
+    window.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && backdrop.classList.contains('visible')) {
+        close();
+      }
+    });
+
+    return {
+      open: open,
+      close: close
+    };
+  }
+
   function createLinkHotspotElement(hotspot) {
 
     // Create wrapper element to hold icon and tooltip.
@@ -334,56 +458,14 @@
     wrapper.appendChild(text);
 
     if (hotspot.url) {
-      wrapper.classList.add('info-hotspot-web');
-
-      var webFrame = document.createElement('div');
-      webFrame.classList.add('info-hotspot-web-frame');
-
-      var webFrameHeader = document.createElement('div');
-      webFrameHeader.classList.add('info-hotspot-web-frame-header');
-      webFrameHeader.textContent = hotspot.title || hotspot.name || '';
-
-      var webFrameClose = document.createElement('button');
-      webFrameClose.classList.add('info-hotspot-web-frame-close');
-      webFrameClose.setAttribute('type', 'button');
-      webFrameClose.setAttribute('aria-label', 'Close website frame');
-      webFrameClose.innerHTML = '&times;';
-
-      var webFrameBody = document.createElement('div');
-      webFrameBody.classList.add('info-hotspot-web-frame-body');
-
-      var webFrameIframe = document.createElement('iframe');
-      webFrameIframe.classList.add('info-hotspot-web-frame-iframe');
-      // Some sites may block iframe embedding through X-Frame-Options/CSP frame-ancestors.
-      webFrameIframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
-      webFrameIframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen');
-      webFrameIframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-      webFrameIframe.setAttribute('src', hotspot.url);
-
-      webFrameHeader.appendChild(webFrameClose);
-      webFrameBody.appendChild(webFrameIframe);
-      webFrame.appendChild(webFrameHeader);
-      webFrame.appendChild(webFrameBody);
-      wrapper.appendChild(webFrame);
-
-      function showWebFrame() {
-        wrapper.classList.add('visible');
-        webFrame.classList.add('visible');
-      }
-
-      function hideWebFrame(event) {
-        if (event) {
-          event.stopPropagation();
-        }
-        wrapper.classList.remove('visible');
-        webFrame.classList.remove('visible');
-      }
-
-      wrapper.querySelector('.info-hotspot-header').addEventListener('click', showWebFrame);
-      webFrameClose.addEventListener('click', hideWebFrame);
+      wrapper.querySelector('.info-hotspot-header').addEventListener('click', function() {
+        WebEmbedOverlay.open({
+          url: hotspot.url,
+          title: hotspot.title || hotspot.name || ''
+        });
+      });
 
       stopTouchAndScrollEventPropagation(wrapper);
-      stopTouchAndScrollEventPropagation(webFrame);
       return wrapper;
     }
 
