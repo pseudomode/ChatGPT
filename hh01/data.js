@@ -211,7 +211,8 @@ var APP_DATA = {
           "yaw": -0.4327166607937336,
           "pitch": -0.09633508226525223,
           "title": "Demo3",
-          "text": "Text"
+          "text": "Text",
+          "url": "https://wikipedia.org"
         },
         {
           "yaw": -0.5234467626432764,
