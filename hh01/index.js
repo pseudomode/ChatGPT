@@ -333,6 +333,60 @@
     wrapper.appendChild(header);
     wrapper.appendChild(text);
 
+    if (hotspot.url) {
+      wrapper.classList.add('info-hotspot-web');
+
+      var webFrame = document.createElement('div');
+      webFrame.classList.add('info-hotspot-web-frame');
+
+      var webFrameHeader = document.createElement('div');
+      webFrameHeader.classList.add('info-hotspot-web-frame-header');
+      webFrameHeader.textContent = hotspot.title || hotspot.name || '';
+
+      var webFrameClose = document.createElement('button');
+      webFrameClose.classList.add('info-hotspot-web-frame-close');
+      webFrameClose.setAttribute('type', 'button');
+      webFrameClose.setAttribute('aria-label', 'Close website frame');
+      webFrameClose.innerHTML = '&times;';
+
+      var webFrameBody = document.createElement('div');
+      webFrameBody.classList.add('info-hotspot-web-frame-body');
+
+      var webFrameIframe = document.createElement('iframe');
+      webFrameIframe.classList.add('info-hotspot-web-frame-iframe');
+      // Some sites may block iframe embedding through X-Frame-Options/CSP frame-ancestors.
+      webFrameIframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+      webFrameIframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen');
+      webFrameIframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+      webFrameIframe.setAttribute('src', hotspot.url);
+
+      webFrameHeader.appendChild(webFrameClose);
+      webFrameBody.appendChild(webFrameIframe);
+      webFrame.appendChild(webFrameHeader);
+      webFrame.appendChild(webFrameBody);
+      wrapper.appendChild(webFrame);
+
+      function showWebFrame() {
+        wrapper.classList.add('visible');
+        webFrame.classList.add('visible');
+      }
+
+      function hideWebFrame(event) {
+        if (event) {
+          event.stopPropagation();
+        }
+        wrapper.classList.remove('visible');
+        webFrame.classList.remove('visible');
+      }
+
+      wrapper.querySelector('.info-hotspot-header').addEventListener('click', showWebFrame);
+      webFrameClose.addEventListener('click', hideWebFrame);
+
+      stopTouchAndScrollEventPropagation(wrapper);
+      stopTouchAndScrollEventPropagation(webFrame);
+      return wrapper;
+    }
+
     // Create a modal for the hotspot content to appear on mobile mode.
     var modal = document.createElement('div');
     modal.innerHTML = wrapper.innerHTML;
