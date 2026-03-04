@@ -828,3 +828,134 @@ body.view-control-buttons .viewControlButton {
 .viewControlButton-6 {
   margin-left: 105px;
 }
+
+/* Web embed overlay */
+body.web-embed-open {
+  overflow: hidden;
+}
+
+.web-embed-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 2000;
+}
+
+.web-embed-overlay.visible {
+  display: flex;
+}
+
+.web-embed-modal {
+  width: min(1100px, 100%);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: #111826;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.web-embed-header,
+.web-embed-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: rgba(58, 68, 84, 0.95);
+}
+
+.web-embed-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.web-embed-close {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.web-embed-body {
+  position: relative;
+  min-height: 300px;
+  flex: 1;
+}
+
+.web-embed-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(17, 24, 38, 0.9);
+  z-index: 1;
+}
+
+.web-embed-loading.hidden {
+  display: none;
+}
+
+.web-embed-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: web-embed-spin 0.9s linear infinite;
+}
+
+@keyframes web-embed-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.web-embed-iframe {
+  border: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: #fff;
+}
+
+.web-embed-footer {
+  display: none;
+  justify-content: space-between;
+}
+
+.web-embed-footer.visible {
+  display: flex;
+}
+
+.web-embed-fallback-link {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .web-embed-overlay {
+    padding: 12px;
+  }
+
+  .web-embed-modal {
+    max-height: 90vh;
+  }
+
+  .web-embed-body,
+  .web-embed-iframe {
+    min-height: 240px;
+  }
+}
+
