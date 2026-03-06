@@ -1,11 +1,19 @@
 const project = {
   defaultScene: "aerial",
   scenes: {
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
     aerial: { id: "aerial", title: "Aerial Island", sourceType: "multires", tileBasePath: "hh01/tiles/0-360_aerial_island_8k", pitch: 4, yaw: 0, hfov: 105, hotSpots: [] },
     patio: { id: "patio", title: "Patio Entry", sourceType: "multires", tileBasePath: "hh01/tiles/2-360_patioentry_8k", pitch: -6, yaw: 18, hfov: 100, hotSpots: [] },
     control: { id: "control", title: "Control Center", sourceType: "multires", tileBasePath: "hh01/tiles/3-360_controlcenter02_8k", pitch: 0, yaw: 0, hfov: 100, hotSpots: [] },
     bedroom: { id: "bedroom", title: "Bedroom Suite", sourceType: "multires", tileBasePath: "hh01/tiles/7-360bedroom8k", pitch: -4, yaw: 18, hfov: 100, hotSpots: [] },
     pool: { id: "pool", title: "Pool Deck", sourceType: "multires", tileBasePath: "hh01/tiles/9-360pool8k", pitch: -6, yaw: 12, hfov: 105, hotSpots: [] },
+=======
+    aerial: { id: "aerial", title: "Aerial Island", panorama: "hh01/tiles/0-360_aerial_island_8k/preview.jpg", pitch: 4, yaw: 0, hfov: 105, hotSpots: [] },
+    patio: { id: "patio", title: "Patio Entry", panorama: "hh01/tiles/2-360_patioentry_8k/preview.jpg", pitch: -6, yaw: 18, hfov: 100, hotSpots: [] },
+    control: { id: "control", title: "Control Center", panorama: "hh01/tiles/3-360_controlcenter02_8k/preview.jpg", pitch: 0, yaw: 0, hfov: 100, hotSpots: [] },
+    bedroom: { id: "bedroom", title: "Bedroom Suite", panorama: "hh01/tiles/7-360bedroom8k/preview.jpg", pitch: -4, yaw: 18, hfov: 100, hotSpots: [] },
+    pool: { id: "pool", title: "Pool Deck", panorama: "hh01/tiles/9-360pool8k/preview.jpg", pitch: -6, yaw: 12, hfov: 105, hotSpots: [] },
+>>>>>>> main
   },
 };
 
@@ -14,8 +22,12 @@ const state = {
   selectedSceneId: project.defaultScene,
   selectedHotspotId: null,
   hotspotDrag: null,
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
   dragNavigationEnabled: true,
   editorPopup: null,
+=======
+  panoDrag: null,
+>>>>>>> main
 };
 
 const $ = (id) => document.getElementById(id);
@@ -62,10 +74,13 @@ const els = {
   iframeHeaderTitle: $("iframeHeaderTitle"),
   iframePanel: $("iframePanel"),
   closeIframe: $("closeIframe"),
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
   openEditorWindow: $("openEditorWindow"),
   dockEditorBack: $("dockEditorBack"),
   editorDock: $("editorDock"),
   editorPanel: document.querySelector(".editor-panel"),
+=======
+>>>>>>> main
 };
 
 function setStatus(msg) { els.statusText.textContent = msg; }
@@ -165,6 +180,7 @@ function makePannellumSpot(sceneId, spot) {
   return spotConfig;
 }
 
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
 function sceneToPannellum(scene) {
   const base = {
     title: scene.title,
@@ -201,6 +217,21 @@ function buildPannellumConfig() {
   const scenes = {};
   getSceneIds().forEach((id) => {
     scenes[id] = sceneToPannellum(getScene(id));
+=======
+function buildPannellumConfig() {
+  const scenes = {};
+  getSceneIds().forEach((id) => {
+    const scene = getScene(id);
+    scenes[id] = {
+      title: scene.title,
+      type: "equirectangular",
+      panorama: scene.panorama,
+      pitch: scene.pitch,
+      yaw: scene.yaw,
+      hfov: scene.hfov,
+      hotSpots: scene.hotSpots.map((spot) => makePannellumSpot(id, spot)),
+    };
+>>>>>>> main
   });
 
   return {
@@ -210,7 +241,11 @@ function buildPannellumConfig() {
       showControls: true,
       mouseZoom: true,
       keyboardZoom: true,
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
       draggable: state.dragNavigationEnabled,
+=======
+      draggable: false,
+>>>>>>> main
       sceneFadeDuration: 0,
     },
     scenes,
@@ -246,6 +281,22 @@ function bindViewerInteractions() {
     els.cursorCoords.textContent = `Cursor: pitch ${pitch.toFixed(3)} / yaw ${yaw.toFixed(3)}`;
   };
 
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
+=======
+  viewerEl.onpointerdown = (event) => {
+    const onHotspot = event.target && event.target.classList && event.target.classList.contains("hotspot");
+    if (onHotspot) return;
+    if (!els.dragNavEnabled.checked || els.authorMode.value !== "navigate") return;
+    state.panoDrag = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      startYaw: state.viewer.getYaw(),
+      startPitch: state.viewer.getPitch(),
+    };
+  };
+
+>>>>>>> main
   viewerEl.onclick = (event) => {
     if (els.authorMode.value === "navigate") return;
     if (event.target && event.target.classList && event.target.classList.contains("hotspot")) return;
@@ -285,16 +336,31 @@ function bindViewerInteractions() {
 
   if (!window.__tourPointerBound) {
     window.addEventListener("pointermove", (event) => {
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
       if (!state.hotspotDrag || !els.dragEditEnabled.checked) return;
       if (state.hotspotDrag.sceneId !== state.selectedSceneId) return;
 
+=======
+      if (state.panoDrag) {
+        const dx = event.clientX - state.panoDrag.x;
+        const dy = event.clientY - state.panoDrag.y;
+        state.viewer.setYaw(state.panoDrag.startYaw - dx * 0.12);
+        state.viewer.setPitch(Math.max(-85, Math.min(85, state.panoDrag.startPitch + dy * 0.12)));
+      }
+
+      if (!state.hotspotDrag || !els.dragEditEnabled.checked) return;
+      if (state.hotspotDrag.sceneId !== state.selectedSceneId) return;
+>>>>>>> main
       const coords = state.viewer.mouseEventToCoords(event);
       if (!coords) return;
       const [pitch, yaw] = coords;
       const scene = getScene();
       const spot = scene.hotSpots.find((h) => h.id === state.hotspotDrag.hotspotId);
       if (!spot) return;
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
 
+=======
+>>>>>>> main
       spot.pitch = Number(pitch.toFixed(3));
       spot.yaw = Number(yaw.toFixed(3));
       state.selectedHotspotId = spot.id;
@@ -304,6 +370,12 @@ function bindViewerInteractions() {
     });
 
     window.addEventListener("pointerup", (event) => {
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
+=======
+      if (state.panoDrag && state.panoDrag.pointerId === event.pointerId) {
+        state.panoDrag = null;
+      }
+>>>>>>> main
       if (state.hotspotDrag && state.hotspotDrag.pointerId === event.pointerId) {
         state.hotspotDrag.element.classList.remove("dragging");
         state.hotspotDrag = null;
@@ -326,16 +398,23 @@ function syncSceneLists() {
   });
 }
 
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
 function scenePathSummary(scene) {
   return scene.sourceType === "multires" ? `${scene.tileBasePath} (multires tiles)` : scene.panorama;
 }
 
+=======
+>>>>>>> main
 function syncSceneControls() {
   const scene = getScene();
   if (!scene) return;
   els.sceneSelect.value = scene.id;
   els.sceneTitle.value = scene.title;
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
   els.panoPath.value = scenePathSummary(scene);
+=======
+  els.panoPath.value = scene.panorama;
+>>>>>>> main
 }
 
 function syncHotspotList() {
@@ -346,6 +425,7 @@ function syncHotspotList() {
     option.value = h.id;
     option.textContent = `${h.type} :: ${h.id}`;
     els.hotspotSelect.append(option);
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
   });
 
   if (!scene.hotSpots.length) {
@@ -525,9 +605,50 @@ function popOutEditorPanel() {
     els.editorPanel.classList.remove("is-popped-out");
     els.dockEditorBack.classList.add("hidden");
     state.editorPopup = null;
+=======
+>>>>>>> main
   });
+
+  if (!scene.hotSpots.length) {
+    state.selectedHotspotId = null;
+    return;
+  }
+
+  if (!state.selectedHotspotId || !scene.hotSpots.some((h) => h.id === state.selectedHotspotId)) {
+    state.selectedHotspotId = scene.hotSpots[0].id;
+  }
+
+  els.hotspotSelect.value = state.selectedHotspotId;
 }
 
+function syncHotspotEditor() {
+  const scene = getScene();
+  const h = scene.hotSpots.find((spot) => spot.id === state.selectedHotspotId);
+  if (!h) return;
+
+  els.hotspotSelect.value = h.id;
+  els.hotspotType.value = h.type;
+  els.hotspotText.value = h.text || "";
+  els.hotspotPitch.value = h.pitch;
+  els.hotspotYaw.value = h.yaw;
+  els.hotspotTargetScene.value = h.targetScene || getSceneIds()[0];
+  els.targetPitch.value = h.targetPitch ?? "";
+  els.targetYaw.value = h.targetYaw ?? "";
+  els.targetHfov.value = h.targetHfov ?? "";
+  els.hotspotFade.value = h.transition?.fade ?? 900;
+
+  const iframe = h.iframe || {};
+  els.iframeUrl.value = iframe.url || "https://wikipedia.org";
+  els.iframeTitle.value = iframe.title || "Embedded Site";
+  els.iframeShowHeader.checked = iframe.showHeader !== false;
+  els.iframeWidth.value = iframe.width || 640;
+  els.iframeHeight.value = iframe.height || 400;
+  els.iframeBorderSize.value = iframe.borderSize || 1;
+  els.iframeBorderColor.value = iframe.borderColor || "#94a3b8";
+  els.iframeRadius.value = iframe.radius || 14;
+}
+
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
 function bindControls() {
   els.openEditorWindow.addEventListener("click", popOutEditorPanel);
   els.dockEditorBack.addEventListener("click", dockEditorPanel);
@@ -538,6 +659,102 @@ function bindControls() {
     setStatus(`Panorama drag navigation ${state.dragNavigationEnabled ? "enabled" : "disabled"}.`);
   });
 
+=======
+function applyHotspotEdits() {
+  const scene = getScene();
+  const h = scene.hotSpots.find((spot) => spot.id === state.selectedHotspotId);
+  if (!h) return;
+
+  h.type = els.hotspotType.value;
+  h.text = els.hotspotText.value;
+  h.pitch = Number(els.hotspotPitch.value || 0);
+  h.yaw = Number(els.hotspotYaw.value || 0);
+
+  if (h.type === "scene") {
+    h.targetScene = els.hotspotTargetScene.value;
+    h.targetPitch = els.targetPitch.value === "" ? undefined : Number(els.targetPitch.value);
+    h.targetYaw = els.targetYaw.value === "" ? undefined : Number(els.targetYaw.value);
+    h.targetHfov = els.targetHfov.value === "" ? undefined : Number(els.targetHfov.value);
+    h.transition = { fade: Number(els.hotspotFade.value || 900) };
+    delete h.iframe;
+  } else if (h.type === "iframe") {
+    h.iframe = {
+      url: els.iframeUrl.value,
+      title: els.iframeTitle.value,
+      showHeader: els.iframeShowHeader.checked,
+      width: Number(els.iframeWidth.value || 640),
+      height: Number(els.iframeHeight.value || 400),
+      borderSize: Number(els.iframeBorderSize.value || 1),
+      borderColor: els.iframeBorderColor.value || "#94a3b8",
+      radius: Number(els.iframeRadius.value || 14),
+    };
+    delete h.targetScene;
+  } else {
+    delete h.targetScene;
+    delete h.iframe;
+  }
+
+  rebuildViewer(scene.id);
+  syncHotspotList();
+  syncHotspotEditor();
+  setStatus(`Applied edits to hotspot ${h.id}.`);
+}
+
+async function exportProjectFiles() {
+  const files = ["entry.html", "assets/styles.css", "assets/viewer.js"];
+  const panoramaPaths = Array.from(new Set(getSceneIds().map((id) => getScene(id).panorama).filter((p) => !p.startsWith("blob:"))));
+  const data = new Map();
+
+  for (const file of files) {
+    const r = await fetch(file);
+    data.set(file, await r.text());
+  }
+  data.set("project-data.json", JSON.stringify({ project, exportedAt: new Date().toISOString() }, null, 2));
+
+  for (const pano of panoramaPaths) {
+    try {
+      const r = await fetch(pano);
+      if (r.ok) data.set(pano, await r.blob());
+    } catch (_e) {
+      setStatus(`Skipped panorama fetch ${pano}`);
+    }
+  }
+
+  if (window.showDirectoryPicker) {
+    try {
+      const dir = await window.showDirectoryPicker();
+      for (const [path, content] of data.entries()) {
+        const parts = path.split("/");
+        const file = parts.pop();
+        let current = dir;
+        for (const part of parts) current = await current.getDirectoryHandle(part, { create: true });
+        const fh = await current.getFileHandle(file, { create: true });
+        const w = await fh.createWritable();
+        await w.write(content);
+        await w.close();
+      }
+      setStatus("Export complete to selected directory.");
+      return;
+    } catch (e) {
+      setStatus(`Directory export cancelled or failed: ${e.message}`);
+      return;
+    }
+  }
+
+  const zip = new window.JSZip();
+  for (const [path, content] of data.entries()) zip.file(path, content);
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "pannellum-tour-project.zip";
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus("Directory Picker unavailable; downloaded ZIP.");
+}
+
+function bindControls() {
+>>>>>>> main
   els.sceneSelect.addEventListener("change", () => {
     state.selectedSceneId = els.sceneSelect.value;
     state.viewer.loadScene(state.selectedSceneId);
@@ -548,6 +765,7 @@ function bindControls() {
   els.replacePano.addEventListener("click", () => {
     const scene = getScene();
     scene.title = els.sceneTitle.value.trim() || scene.title;
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
 
     const file = els.panoFile.files && els.panoFile.files[0];
     const typedPath = els.panoPath.value.trim();
@@ -561,6 +779,12 @@ function bindControls() {
       scene.panorama = typedPath;
       delete scene.tileBasePath;
     }
+=======
+    scene.panorama = els.panoPath.value.trim() || scene.panorama;
+
+    const file = els.panoFile.files && els.panoFile.files[0];
+    if (file) scene.panorama = URL.createObjectURL(file);
+>>>>>>> main
 
     syncSceneLists();
     rebuildViewer(scene.id);
@@ -623,7 +847,11 @@ function initialize() {
   syncHotspotList();
   syncHotspotEditor();
   bindControls();
+<<<<<<< codex/build-pannellum-panoramic-image-tour-oot4gt
   setStatus("Ready. Multires tile mapping enabled for built-in scenes; drag navigation uses native Pannellum controls.");
+=======
+  setStatus("Ready. Navigate with click-drag, or switch author mode to add hotspots.");
+>>>>>>> main
   window.__tourState = state;
 }
 
