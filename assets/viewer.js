@@ -1,11 +1,11 @@
 const project = {
   defaultScene: "aerial",
   scenes: {
-    aerial: { id: "aerial", title: "Aerial Island", sourceType: "multires", tileBasePath: "hh01/tiles/0-360_aerial_island_8k", pitch: 4, yaw: 0, hfov: 105, hotSpots: [] },
-    patio: { id: "patio", title: "Patio Entry", sourceType: "multires", tileBasePath: "hh01/tiles/2-360_patioentry_8k", pitch: -6, yaw: 18, hfov: 100, hotSpots: [] },
-    control: { id: "control", title: "Control Center", sourceType: "multires", tileBasePath: "hh01/tiles/3-360_controlcenter02_8k", pitch: 0, yaw: 0, hfov: 100, hotSpots: [] },
-    bedroom: { id: "bedroom", title: "Bedroom Suite", sourceType: "multires", tileBasePath: "hh01/tiles/7-360bedroom8k", pitch: -4, yaw: 18, hfov: 100, hotSpots: [] },
-    pool: { id: "pool", title: "Pool Deck", sourceType: "multires", tileBasePath: "hh01/tiles/9-360pool8k", pitch: -6, yaw: 12, hfov: 105, hotSpots: [] },
+    aerial: { id: "aerial", title: "Aerial Island", panorama: "hh01/tiles/0-360_aerial_island_8k/preview.jpg", pitch: 4, yaw: 0, hfov: 105, hotSpots: [] },
+    patio: { id: "patio", title: "Patio Entry", panorama: "hh01/tiles/2-360_patioentry_8k/preview.jpg", pitch: -6, yaw: 18, hfov: 100, hotSpots: [] },
+    control: { id: "control", title: "Control Center", panorama: "hh01/tiles/3-360_controlcenter02_8k/preview.jpg", pitch: 0, yaw: 0, hfov: 100, hotSpots: [] },
+    bedroom: { id: "bedroom", title: "Bedroom Suite", panorama: "hh01/tiles/7-360bedroom8k/preview.jpg", pitch: -4, yaw: 18, hfov: 100, hotSpots: [] },
+    pool: { id: "pool", title: "Pool Deck", panorama: "hh01/tiles/9-360pool8k/preview.jpg", pitch: -6, yaw: 12, hfov: 105, hotSpots: [] },
   },
 };
 
@@ -14,7 +14,7 @@ const state = {
   selectedSceneId: project.defaultScene,
   selectedHotspotId: null,
   hotspotDrag: null,
-  dragNavigationEnabled: true,
+  panoDrag: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -160,42 +160,19 @@ function makePannellumSpot(sceneId, spot) {
   return spotConfig;
 }
 
-function sceneToPannellum(scene) {
-  const base = {
-    title: scene.title,
-    pitch: scene.pitch,
-    yaw: scene.yaw,
-    hfov: scene.hfov,
-    hotSpots: scene.hotSpots.map((spot) => makePannellumSpot(scene.id, spot)),
-  };
-
-  if (scene.sourceType === "multires") {
-    return {
-      ...base,
-      type: "multires",
-      multiRes: {
-        basePath: scene.tileBasePath,
-        path: "/%l/%s/%y/%x",
-        fallbackPath: "/1/%s/0/0",
-        extension: "jpg",
-        tileResolution: 512,
-        maxLevel: 3,
-        cubeResolution: 2048,
-      },
-    };
-  }
-
-  return {
-    ...base,
-    type: "equirectangular",
-    panorama: scene.panorama,
-  };
-}
-
 function buildPannellumConfig() {
   const scenes = {};
   getSceneIds().forEach((id) => {
-    scenes[id] = sceneToPannellum(getScene(id));
+    const scene = getScene(id);
+    scenes[id] = {
+      title: scene.title,
+      type: "equirectangular",
+      panorama: scene.panorama,
+      pitch: scene.pitch,
+      yaw: scene.yaw,
+      hfov: scene.hfov,
+      hotSpots: scene.hotSpots.map((spot) => makePannellumSpot(id, spot)),
+    };
   });
 
   return {
@@ -205,7 +182,7 @@ function buildPannellumConfig() {
       showControls: true,
       mouseZoom: true,
       keyboardZoom: true,
-      draggable: state.dragNavigationEnabled,
+      draggable: false,
       sceneFadeDuration: 0,
     },
     scenes,
@@ -239,6 +216,19 @@ function bindViewerInteractions() {
     if (!coords) return;
     const [pitch, yaw] = coords;
     els.cursorCoords.textContent = `Cursor: pitch ${pitch.toFixed(3)} / yaw ${yaw.toFixed(3)}`;
+  };
+
+  viewerEl.onpointerdown = (event) => {
+    const onHotspot = event.target && event.target.classList && event.target.classList.contains("hotspot");
+    if (onHotspot) return;
+    if (!els.dragNavEnabled.checked || els.authorMode.value !== "navigate") return;
+    state.panoDrag = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      startYaw: state.viewer.getYaw(),
+      startPitch: state.viewer.getPitch(),
+    };
   };
 
   viewerEl.onclick = (event) => {
@@ -280,16 +270,21 @@ function bindViewerInteractions() {
 
   if (!window.__tourPointerBound) {
     window.addEventListener("pointermove", (event) => {
+      if (state.panoDrag) {
+        const dx = event.clientX - state.panoDrag.x;
+        const dy = event.clientY - state.panoDrag.y;
+        state.viewer.setYaw(state.panoDrag.startYaw - dx * 0.12);
+        state.viewer.setPitch(Math.max(-85, Math.min(85, state.panoDrag.startPitch + dy * 0.12)));
+      }
+
       if (!state.hotspotDrag || !els.dragEditEnabled.checked) return;
       if (state.hotspotDrag.sceneId !== state.selectedSceneId) return;
-
       const coords = state.viewer.mouseEventToCoords(event);
       if (!coords) return;
       const [pitch, yaw] = coords;
       const scene = getScene();
       const spot = scene.hotSpots.find((h) => h.id === state.hotspotDrag.hotspotId);
       if (!spot) return;
-
       spot.pitch = Number(pitch.toFixed(3));
       spot.yaw = Number(yaw.toFixed(3));
       state.selectedHotspotId = spot.id;
@@ -299,6 +294,9 @@ function bindViewerInteractions() {
     });
 
     window.addEventListener("pointerup", (event) => {
+      if (state.panoDrag && state.panoDrag.pointerId === event.pointerId) {
+        state.panoDrag = null;
+      }
       if (state.hotspotDrag && state.hotspotDrag.pointerId === event.pointerId) {
         state.hotspotDrag.element.classList.remove("dragging");
         state.hotspotDrag = null;
@@ -321,16 +319,12 @@ function syncSceneLists() {
   });
 }
 
-function scenePathSummary(scene) {
-  return scene.sourceType === "multires" ? `${scene.tileBasePath} (multires tiles)` : scene.panorama;
-}
-
 function syncSceneControls() {
   const scene = getScene();
   if (!scene) return;
   els.sceneSelect.value = scene.id;
   els.sceneTitle.value = scene.title;
-  els.panoPath.value = scenePathSummary(scene);
+  els.panoPath.value = scene.panorama;
 }
 
 function syncHotspotList() {
@@ -424,20 +418,16 @@ function applyHotspotEdits() {
 
 async function exportProjectFiles() {
   const files = ["entry.html", "assets/styles.css", "assets/viewer.js"];
-  const extraPanoramas = getSceneIds()
-    .map((id) => getScene(id))
-    .filter((scene) => scene.sourceType === "equirectangular")
-    .map((scene) => scene.panorama)
-    .filter((p) => p && !p.startsWith("blob:"));
-
+  const panoramaPaths = Array.from(new Set(getSceneIds().map((id) => getScene(id).panorama).filter((p) => !p.startsWith("blob:"))));
   const data = new Map();
+
   for (const file of files) {
     const r = await fetch(file);
     data.set(file, await r.text());
   }
   data.set("project-data.json", JSON.stringify({ project, exportedAt: new Date().toISOString() }, null, 2));
 
-  for (const pano of extraPanoramas) {
+  for (const pano of panoramaPaths) {
     try {
       const r = await fetch(pano);
       if (r.ok) data.set(pano, await r.blob());
@@ -480,12 +470,6 @@ async function exportProjectFiles() {
 }
 
 function bindControls() {
-  els.dragNavEnabled.addEventListener("change", () => {
-    state.dragNavigationEnabled = els.dragNavEnabled.checked;
-    rebuildViewer(state.selectedSceneId);
-    setStatus(`Panorama drag navigation ${state.dragNavigationEnabled ? "enabled" : "disabled"}.`);
-  });
-
   els.sceneSelect.addEventListener("change", () => {
     state.selectedSceneId = els.sceneSelect.value;
     state.viewer.loadScene(state.selectedSceneId);
@@ -496,19 +480,10 @@ function bindControls() {
   els.replacePano.addEventListener("click", () => {
     const scene = getScene();
     scene.title = els.sceneTitle.value.trim() || scene.title;
+    scene.panorama = els.panoPath.value.trim() || scene.panorama;
 
     const file = els.panoFile.files && els.panoFile.files[0];
-    const typedPath = els.panoPath.value.trim();
-
-    if (file) {
-      scene.sourceType = "equirectangular";
-      scene.panorama = URL.createObjectURL(file);
-      delete scene.tileBasePath;
-    } else if (typedPath) {
-      scene.sourceType = "equirectangular";
-      scene.panorama = typedPath;
-      delete scene.tileBasePath;
-    }
+    if (file) scene.panorama = URL.createObjectURL(file);
 
     syncSceneLists();
     rebuildViewer(scene.id);
@@ -571,7 +546,7 @@ function initialize() {
   syncHotspotList();
   syncHotspotEditor();
   bindControls();
-  setStatus("Ready. Multires tile mapping enabled for built-in scenes; drag navigation uses native Pannellum controls.");
+  setStatus("Ready. Navigate with click-drag, or switch author mode to add hotspots.");
   window.__tourState = state;
 }
 
