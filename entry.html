@@ -3,35 +3,174 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hero Home - Entry</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-    />
+    <title>Pannellum Tour Editor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
     <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   </head>
   <body>
     <main class="viewer-page">
-      <span class="page-title">Entry</span>
-      <div
-        id="viewer"
-        data-panorama="https://herohome.neocities.org/360controlCenter8k.jpeg"
-        data-pitch="0"
-        data-yaw="0"
-        aria-label="360 panoramic view of the entry page"
-      ></div>
-      <a
-        class="overlay-link"
-        href="control-center.html"
-        aria-label="Go to Control Center"
-      >
-        <img
-          src="https://herohome.neocities.org/HH_icon_compass01.png"
-          alt="Compass button"
-        />
-      </a>
+      <header id="topHeaderBar" class="top-header-bar">
+        <img id="headerLogo" class="header-logo" src="hh01/icons/logo_herohome_small_589.png" alt="Logo" />
+      </header>
+
+      <div id="viewer"></div>
+      <div id="sceneFadeLayer" class="scene-fade-layer"></div>
+
+      <button id="openEditorWindow" class="open-editor-window" type="button">Pop Out Editor</button>
+
+      <div id="editorDock">
+        <section class="editor-panel" aria-label="Tour editor">
+          <div class="panel-header-row">
+            <h1>Pannellum Tour Authoring Tool</h1>
+            <button id="dockEditorBack" type="button" class="hidden">Dock Back</button>
+          </div>
+
+          <div class="editor-grid">
+            <fieldset class="collapsible-section">
+              <legend>Navigation + Cursor</legend>
+              <label><input id="dragNavEnabled" type="checkbox" checked /> Click-drag panorama navigation</label>
+              <label for="authorMode">Author mode</label>
+              <select id="authorMode">
+                <option value="navigate">Navigate only</option>
+                <option value="add-info">Add infospot by click</option>
+                <option value="add-link">Add linkspot by click</option>
+                <option value="add-iframe">Add iframe hotspot by click</option>
+              </select>
+              <p id="cursorCoords" class="mono">Cursor: pitch 0.000 / yaw 0.000</p>
+            </fieldset>
+
+            <fieldset class="collapsible-section">
+              <legend>Panorama Images + Mapping</legend>
+              <label for="sceneSelect">Scene</label>
+              <select id="sceneSelect"></select>
+              <label for="sceneTitle">Title</label>
+              <input id="sceneTitle" type="text" />
+              <label for="panoPath">Panorama image path / URL</label>
+              <input id="panoPath" type="text" placeholder="hh01/tiles/.../preview.jpg" />
+              <label for="panoFile">or Upload image</label>
+              <input id="panoFile" type="file" accept="image/*" />
+
+              <label for="sphereTessellation">Sphere tessellation (8-256)</label>
+              <input id="sphereTessellation" type="number" min="8" max="256" value="64" />
+              <label for="uvScaleX">UV / Tiling X</label>
+              <input id="uvScaleX" type="number" step="0.1" min="0.1" value="1.0" />
+              <label for="uvScaleY">UV / Tiling Y</label>
+              <input id="uvScaleY" type="number" step="0.1" min="0.1" value="1.0" />
+
+              <div class="row">
+                <button id="viewPano" type="button">View</button>
+                <button id="replacePano" type="button">Replace</button>
+                <button id="deletePano" type="button">Delete Scene</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="collapsible-section">
+              <legend>Header / Logo</legend>
+              <label for="logoSelect">Logo file (logo folder)</label>
+              <select id="logoSelect"></select>
+              <label for="logoPath">or custom logo path</label>
+              <input id="logoPath" type="text" placeholder="hh01/icons/logo_herohome_large01.png" />
+              <label for="logoAlignX">Horizontal placement</label>
+              <select id="logoAlignX">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+              <label for="logoAlignY">Vertical placement</label>
+              <select id="logoAlignY">
+                <option value="top">Top</option>
+                <option value="center">Center</option>
+                <option value="bottom">Bottom</option>
+              </select>
+              <label for="logoSize">Logo size (px)</label>
+              <input id="logoSize" type="number" min="24" max="220" value="72" />
+              <button id="applyHeader" type="button">Apply Header Settings</button>
+            </fieldset>
+
+            <fieldset class="collapsible-section">
+              <legend>Add Linkspot Defaults</legend>
+              <label for="linkTarget">Target scene</label>
+              <select id="linkTarget"></select>
+              <label for="transitionFade">Transition fade (ms)</label>
+              <input id="transitionFade" type="number" min="0" value="900" />
+            </fieldset>
+
+            <fieldset class="collapsible-section">
+              <legend>Hotspot Editor</legend>
+              <label for="hotspotSelect">Hotspot</label>
+              <select id="hotspotSelect"></select>
+              <label><input id="dragEditEnabled" type="checkbox" checked /> Click-hold-drag to reposition selected hotspot</label>
+              <label for="hotspotType">Type</label>
+              <select id="hotspotType">
+                <option value="info">Info</option>
+                <option value="scene">Link</option>
+                <option value="iframe">IFrame</option>
+              </select>
+              <label for="hotspotText">Text / Tooltip</label>
+              <input id="hotspotText" type="text" />
+              <label for="hotspotPitch">Pitch</label>
+              <input id="hotspotPitch" type="number" step="0.001" />
+              <label for="hotspotYaw">Yaw</label>
+              <input id="hotspotYaw" type="number" step="0.001" />
+              <label for="hotspotTargetScene">Target Scene (for linkspot)</label>
+              <select id="hotspotTargetScene"></select>
+              <label for="targetPitch">Target Pitch (optional)</label>
+              <input id="targetPitch" type="number" step="0.001" />
+              <label for="targetYaw">Target Yaw (optional)</label>
+              <input id="targetYaw" type="number" step="0.001" />
+              <label for="targetHfov">Target HFOV (optional)</label>
+              <input id="targetHfov" type="number" step="0.1" />
+              <label for="hotspotFade">Transition Fade ms (linkspot)</label>
+              <input id="hotspotFade" type="number" min="0" />
+
+              <details open>
+                <summary>IFrame settings (for iframe hotspots)</summary>
+                <label for="iframeUrl">URL</label>
+                <input id="iframeUrl" type="url" value="https://wikipedia.org" />
+                <label for="iframeTitle">Header Title</label>
+                <input id="iframeTitle" type="text" value="Embedded Site" />
+                <label><input id="iframeShowHeader" type="checkbox" checked /> Show header</label>
+                <label for="iframeWidth">Overlay width (px)</label>
+                <input id="iframeWidth" type="number" min="300" value="640" />
+                <label for="iframeHeight">Overlay height (px)</label>
+                <input id="iframeHeight" type="number" min="220" value="400" />
+                <label for="iframeBorderSize">Border size (px)</label>
+                <input id="iframeBorderSize" type="number" min="0" value="1" />
+                <label for="iframeBorderColor">Border color</label>
+                <input id="iframeBorderColor" type="color" value="#94a3b8" />
+                <label for="iframeRadius">Rounded corner radius (px)</label>
+                <input id="iframeRadius" type="number" min="0" value="14" />
+              </details>
+
+              <div class="row">
+                <button id="applyHotspot" type="button">Apply Hotspot Edits</button>
+                <button id="deleteHotspot" type="button">Delete Hotspot</button>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="row export-row">
+            <button id="copyJson" type="button">Copy Project JSON</button>
+            <button id="exportProject" type="button">Export all project files</button>
+          </div>
+          <p id="statusText" class="mono">Ready.</p>
+        </section>
+      </div>
+
+      <nav id="quickSceneBar" class="quick-scene-bar" aria-label="Quick scene navigation"></nav>
+
+      <aside id="iframeOverlay" class="iframe-overlay hidden" aria-hidden="true">
+        <div id="iframeHeader" class="iframe-header">
+          <strong id="iframeHeaderTitle">Embedded Site</strong>
+          <button id="closeIframe" type="button">Close</button>
+        </div>
+        <iframe id="iframePanel" title="Embedded site"></iframe>
+      </aside>
     </main>
+
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="assets/viewer.js"></script>
   </body>
 </html>
