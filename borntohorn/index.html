@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keys, Notes and Fingerings for Trumpet and French Horn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <div class="hero-topline">
+            <p class="eyebrow">Born To Horn</p>
+            <div class="theme-toggle-wrap">
+              <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark and light mode">
+                <span class="theme-option">Light</span>
+                <span class="theme-thumb" aria-hidden="true"></span>
+                <span class="theme-option">Dark</span>
+              </button>
+            </div>
+          </div>
+          <h1>Keys, Notes and Fingerings for Trumpet and French Horn</h1>
+          <p class="hero-text">
+            Switch between Bb trumpet, single French horn, and double French horn,
+            filter by key families, and browse every scale note from written C below
+            the staff up to written C above the staff.
+          </p>
+          <div class="chromatic-toggle-wrap">
+            <button class="chromatic-toggle" id="chromatic-toggle" type="button" aria-pressed="false">
+              <span class="toggle-label">Chromatic Scale</span>
+              <span class="toggle-state">Off</span>
+            </button>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <div class="instrument-toggle" aria-label="Choose instrument" role="tablist">
+            <button class="toggle-button is-active" data-instrument="trumpet" type="button">
+              Trumpet
+            </button>
+            <button class="toggle-button" data-instrument="horn" type="button">
+              French Horn
+            </button>
+            <button class="toggle-button" data-instrument="doubleHorn" type="button">
+              Double Horn
+            </button>
+          </div>
+          <div class="panel-controls">
+            <div class="control-group">
+              <label for="category-select">Key category</label>
+              <select id="category-select"></select>
+            </div>
+            <div class="control-group">
+              <label for="key-select">Concert key</label>
+              <select id="key-select"></select>
+            </div>
+          </div>
+          <div class="range-pill">
+            <p class="summary-mini-label">Selected concert key</p>
+            <p class="compact-row"><strong id="concert-key-heading"></strong></p>
+            <p class="compact-detail" id="concert-scale"></p>
+            <p class="summary-mini-label">Written for instrument</p>
+            <p class="compact-row"><strong id="written-key-heading"></strong></p>
+            <p class="compact-detail" id="written-scale"></p>
+            <p class="summary-mini-label">Notes in range</p>
+            <p class="compact-row"><strong id="note-count"></strong></p>
+            <p class="compact-detail" id="range-description"></p>
+            <p class="compact-detail" id="range-pill"></p>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="directory-section">
+          <div class="notes-grid" id="notes-grid"></div>
+        </section>
+      </main>
+      <footer class="page-footer">For Milamu and Friends -Love, Your Father</footer>
+    </div>
+
+    <script src="./assets/js/app.js"></script>
+  </body>
+</html>
