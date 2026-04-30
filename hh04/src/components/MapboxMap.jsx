@@ -1,6 +1,6 @@
 export default function MapboxMap({ center = [34.05, -118.24], zoom = 10, height = 300 }) {
-  const MAPBOX_TOKEN = "pk.eyJ1IjoicHNldWRvbW9kZSIsImEiOiJja3dyNzg2eXEwdG9rMm9ybHc4MHRuczVxIn0.QsgNgt6vs8yfn_aKQYh_RA";
-  const STYLE_ID = "pseudomode/cmmxw3mpi00fw01skhu9y9a6q";
+  const MAPBOX_TOKEN = "*****Ent3erKeyHere*******";
+  const STYLE_ID = "***EnterHere***";
   const [lon, lat] = [center[1], center[0]];
   const h = typeof height === "number" ? height : 300;
   const w = 800;
